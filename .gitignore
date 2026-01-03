@@ -9,6 +9,7 @@
 node_modules/
 client/node_modules/
 server/node_modules/
+.venv/
 
 # -------------------------------
 # Build outputs / caches
@@ -109,6 +110,7 @@ jest.config.*.local
 .history/
 .cache/
 .sass-cache/
+__pycache__/
 
 # -------------------------------
 # Optional: ignore built model assets if generated during build
@@ -116,5 +118,7 @@ jest.config.*.local
 # public/models/*.gltf
 # public/models/*.glb
 # public/models/*.bin
+
+*.py[cod]
 
 # End of file
