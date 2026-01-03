@@ -160,7 +160,86 @@ engine = create_engine("sqlite:///./db/sql_app.db", connect_args={
 Access SQLAlchemy object data by attributes
 
 # Alembic
+For database migrations
 
 # B-Tree
+For index
 
-# Recombination Index
+# Composite Index
+AKA: Multi-Column Index
+Situations: 
+  - When single column index cant narrow search range/scope or cant avoid query back to table
+Use Cases:
+  - When need query a non-index column frequently
+  - When ofent use some non-index column to do filtering or sorting
+
+# Table/Record Relationships
+## The realization of 1to1, 1toN, NtoM relationships:
+1. **1to1:**
+Tips: Its actually limited **1toN**, just added only on configuration in `relationship()` of the side which dont config the `ForeignKey`
+Exp:
+```
+class OneSideA(Base):
+  __tablename__ = "oneSideAs"
+  id = Column(Integer, primary_key=True)
+
+  oneSideBs = relationship("OneSideB", back_populates="oneSideAs", useList=False)
+
+class OneSideB(Base):
+  __tablename__ = "oneSideBs"
+  id = Column(Integer, primary_key=True)
+  
+  oneSideA_id = Column(Integer, ForeignKey("oneSideAs.id"))
+  oneSideAs = relationship("OneSideA", back_populates="oneSideBs")
+```
+2. **1toN:**
+Exp:
+```
+class OneSide(Base):
+  __tablename_ = "oneSides"
+  id = Column(Integer, primary_key=True)
+
+  manySides = relationship("ManySide", back_populates="oneSide", uselist=True)  # uselist is true by default
+
+class ManySide(Base):
+  __tablename__ = "manySides"
+  id = Column(Integer, primary_key=True)
+
+  oneSide_id = Column(Integer, ForeignKey("oneSides.id"))
+  oneSide = relationship("OneSide", back_populates="manySides")
+```
+3. **NtoM:**
+Tips: Different with **1to1** and **1toN**, because use one column to store multiple ID is not welcomed, we use an **Association Table** to record the mapping relationship between two tables
+Key Operations:
+  1. Defines a Table object as **Association Table**
+  2. Assign `secondary` parameter to this table in `relationship` of the two table.
+    This `secondary` table means **Intermediate Table**
+Exp:
+```
+nSide_mSide_table = Table(
+  "nSide_mSide",
+  Base.metadata,
+  Column("nSide_id", ForeignKey("nSides.id"), primary_key=True)
+  Column("mSIde_id", ForeignKey("mSides.id"), primary_key=True)
+)
+
+class NSide(Base):
+  __tablename__ = "nSides"
+  id = Column(Integer, primary_key=True)
+
+  mSides = relationship("MSide", secondary=nSide_mSide_table, back_populates="nSides")
+
+class MSide(Base):
+  __tablename__ = "mSides"
+  id = Column(Integer, primary_key=True)
+
+  nSides = relationship("NSide", secondary=nSide_mSide_table, back_populates="mSIdes")
+```
+## Soul Operations
+1. **`ForeignKey`:** Decides the physically quote diretion of data
+1. **`relationship`:** Decide:
+  1. This relationship column get one object or a list of objects
+  2. Which table to get the objects (the first str param)
+  3. which column to meet the relationship back to this record (`back_populates`)
+
+# `ForeignKey` `relationship` Operational Differences

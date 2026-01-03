@@ -16,7 +16,7 @@ class Tank(TankBase):
   id: int
 
   class Config:
-    from_attributes = True  # Allow Pydanyic (dict) read SQLAlchemy model (object)
+    from_attributes = True  # Allow Pydantic (dict) read SQLAlchemy model (object)
     
 # DataPoint
 class DataPointBase(BaseModel):

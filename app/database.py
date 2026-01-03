@@ -14,4 +14,6 @@ engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread
 SessionLocal = sessionmaker(autoflush=False, bind=engine)
 
 class Base(DeclarativeBase):      # Replace Base = declarative_base(), to get better hint
+  # This is a private namespace, has its own MetaData obejct, to manage its tables
+  # Declarativebase is public namespace for all tables
   pass
