@@ -190,14 +190,14 @@ class OneSideA(Base):
   __tablename__ = "oneSideAs"
   id = Column(Integer, primary_key=True)
 
-  oneSideBs = relationship("OneSideB", back_populates="oneSideAs", useList=False)
+  oneSideBs = relationship("OneSideB", back_populates="oneSideAs", uselist=False)
 
 class OneSideB(Base):
   __tablename__ = "oneSideBs"
   id = Column(Integer, primary_key=True)
   
   oneSideA_id = Column(Integer, ForeignKey("oneSideAs.id"), index=True)
-  oneSideAs = relationship("OneSideA", back_populates="oneSideBs")
+  oneSideAs = relationship("OneSideA", back_populates="oneSideBs")  # uselist=False by default
 ```
 2. **1toN:**
 Exp:
@@ -250,6 +250,8 @@ class MSide(Base):
   1. This relationship column get one object or a list of objects
   2. Which table to get the objects (the first str param)
   3. which column to meet the relationship back to this record (`back_populates`)
+## Tips:
+If the Table Class has `relationship()` attribute, and its the one side with `ForeignKey` `Column`, its `uselist` configuration of `relationship()` is `False` by default.
 
 # `ForeignKey` `relationship` Differences
 ## Compare
@@ -327,3 +329,12 @@ class Tank(Base):
   **Such as:** `name`
   **Config:** `True`
   **Reason:** Offen search
+
+# When a tuple has only one item
+Append a ',' if a tuple has only one item, in case it cant be recognize as a tuple.
+Exp:
+```
+  __table_args__ = (
+    UniqueConstraint("user_id", "name", name="_user_device_uc"),
+  )
+```
