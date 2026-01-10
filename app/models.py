@@ -2,10 +2,17 @@
 
 # Main Task: Use Base to create models for SQLAlchemy
 
+import uuid
 from sqlalchemy import Column, Integer, String, Float, ForeignKey, Enum, Table, UniqueConstraint
-from .database import Base
 from sqlalchemy.orm import relationship
+from .database import Base
 import enum
+from .utils.GUID import GUID
+
+try:
+  from uuid import uuid7
+except ImportError:
+  from uuid6 import uuid7
 
 class PointType(enum.Enum):
   INPUT = "input"
