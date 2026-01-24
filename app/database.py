@@ -4,16 +4,27 @@
 Task: Offer engine, SessionLocal, Base
 '''
 
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, DeclarativeBase
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
+from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.pool import NullPool
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///./db/apuarium.db"
+DATABASE_URL = "postgresql+asyncpg://ccl_commander:mypassword@localhost:5432/CoCrescoLinking_db"
 
-# connect_args={"check_same_thread": False} is necessary for SQLite
-engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
-SessionLocal = sessionmaker(autoflush=False, bind=engine)
+# Create async engine
+engine = create_async_engine(
+  DATABASE_URL,
+  echo=True,         # To check SQL sentences
+  poolclass=NullPool
+)
 
-class Base(DeclarativeBase):      # Replace Base = declarative_base(), to get better hint
-  # This is a private namespace, has its own MetaData obejct, to manage its tables
+# Async SessionLocal
+AsyncSessionLocal = async_sessionmaker(
+  bind=engine,
+  class_=AsyncSession,
+  expire_on_commit=False,
+)
+
+class Base(DeclarativeBase):
+  # This is a private namespace, has its own MetaData object, to manage its tables
   # Declarativebase is public namespace for all tables
   pass

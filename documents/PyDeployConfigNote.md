@@ -78,3 +78,12 @@ if __name__ == "__main__":
 2. 运行脚本
 `python run_dev.py`
 
+# 连接池
+## 配置准则
+代码案例：`engine = create_async_engine(DATABASE_URL, echo=False, poolclass=NullPool)`
+`poolclass`可以有配置选项：不配置（默认`AsyncAdaptedQueuePool`）、`NullPoll from sqlalchemy.pool`
+对比：
+| 选项                                | 行为                          | 使用场景                           |
+| :---------------------------------- | :---------------------------- | :--------------------------------- |
+| `NullPool`                          | 每次新建/关闭真实连耳机，无池 | 开发、测试、多进程部署、一次性脚本 |
+| 默认池（如`AsyncAdaptedQueuePool`） | 连接复用，提升性能            | 生产环境、长运行服务               |

@@ -28,6 +28,7 @@
 
 - **常用psql元命令：**
   - `\l`：查看**所有数据库**
+    - `list`：查看**所有数据库及其详细信息**
   - `\dt`：查看**当前数据库**中的所有表
     - `dt`：desctibe tables
   - `\dv`
@@ -63,6 +64,15 @@
 
 ##### 创建超级用户
 `CREATE USER 用户名 WITH SUPERUSER LOGIN PASSWORD '密码'`
+
+##### 创建用户时的权限配置
+例如：`CREATE ROLE ccl_dev WITH PASSWORD 'mypassword' LOGIN CREATEDB CREATEROLE;`
+- `WITH` 代表后面是定义用户的属性。可以省略。必须在属性配置前面写。
+- `PASSWORD '<密码>'` 是定义用户的密码
+- `LOGIN` 允许登录
+- `CREATEDB` 允许创建数据库
+- `CREATEROLE` 允许创建用户
+- 各个属性配置的先后顺序可自由调整
 
 ### 查询用户
 #### SQL
