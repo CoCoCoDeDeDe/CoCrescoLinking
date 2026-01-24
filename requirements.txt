@@ -2,3 +2,10 @@ fastapi
 uvicorn[standard]
 SQLAlchemy
 uuid6
+asyncpg
+websockets
+python-dotenv
+pydantic
+pydantic_core
+pip
+PyYAML

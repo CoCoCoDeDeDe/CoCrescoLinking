@@ -1,6 +1,7 @@
 <!-- documents\PSQL_DeployConfigNote.md -->
 
 # 进入一个数据库
+一个psql数据库 = 一个 Cluster(集群) = 一个数据目录（PGDATA） + 一个 postmaster 进程
 | `psql`客户端在启动时进入任意一个数据库，`psql`通过当前数据库去执行各种操作，包括查询其他数据库`\l`
 **通过 PowerShell 进入的命令**
   1. 详细参数：`psql -U postgres -h localhost -p 5432 -d postgres`
@@ -39,7 +40,7 @@
   - 授权：`GRANT ALL PRIVILEGES ON DATABASE myfastapi_db TO myuser;`
   - 退出 psql：`\q`
   - 连接数据库（包括切换）：`\c 数据库名`、`\connect 数据库名`
-| 当输入 SQL 语句没有在末尾加`-`时，`psql`会认为在进行多行输入，显示例如`postgres-#`，要安全继续可输入`;`以让 SQL 语句的输入完整结束
+| 当输入 SQL 语句没有在末尾加`;`时，`psql`会认为在进行多行输入，显示例如`postgres-#`，要安全继续可输入`;`以让 SQL 语句的输入完整结束
 
 ## 默认数据库`postgres`
 **特性：**
@@ -55,6 +56,14 @@
 
 ## 相关命令
 
+## 创建用户
+#### SQL
+##### 创建普通用户
+`CREATE USER 用户名 WITH PASSWORD '密码';`
+
+##### 创建超级用户
+`CREATE USER 用户名 WITH SUPERUSER LOGIN PASSWORD '密码'`
+
 ### 查询用户
 #### SQL
 `SELECT current_user;`
@@ -64,6 +73,10 @@
 - `current_user` 是通用的 SQL 标准函数（无`()`的关键字形态）
 - 都是返回当前会话（session）的用户
 - 查询“我是谁？”
+
+##### 根据用户权限进行筛选
+`SELECT rolname FROM pg_roles WHERE rolsuper = true;`
+  - 查询集群中的超级用户
 
 #### psql 元命令
 - `\conninfo`
@@ -83,6 +96,13 @@
 ### 切换用户
 切换到其他用户：`SET ROLE myuser;`
 切换回原始用户：`RESET ROLE;`、`SET ROLE NONE;`
+
+### 更改用户
+#### 撤销用户超级用户权限
+`ALTER ROLE 用户名 NOSUPERUSER;`
+
+**注意**
+  - 若将集群中所有的超级用户权限都撤销，集群将没有任何超级用户，也没有任何用户可以再创建或赋予超级用户
 
 ## `pg_roles`
 - 是一个特殊的**系统视图（system view）**，属于 PostgreSQL 的**系统目录（System Catalog）**
@@ -161,6 +181,8 @@ WHERE table_name = 'pg_roles'
 
 | `d+` 查看目标的依赖关系
 | 删除前备份：`pg_dump -t users mydb > backup.sql`
+| Dependents（被依赖者）
+| Depends On（依赖项）
 
 # PostgreSQL (Cluster)实例架构
 ## Diagram：PostgreSQL 的三层对象模型
@@ -207,6 +229,14 @@ PostgreSQL 实例（Cluster）
   **Sequences：** `\ds`、`\ds+`
   **Schemas：** `\dn`、`\dn+`（所有者和权限）
   | 查询用户：`\du`，`du+`
+
+
+# 原子性操作
+- 当一个原子性事务中只有一条语句，默认处于 **自动提交模式（autocommit）**，该单条语句被自动包装成一个事务而提交。
+- 当一个原子性事务中有多条语句，应当显式使用 **`BEGIN;...COMMIT;`**，
+  - 在该事务中，当任何一条语句出错，会进入 **"failed transaction block"**状态，在该状态下 **只可以**显式执行`ROLLBACK`进行整体回滚并推出该状态。
+  - 如果在事务出错前执行`SAVEPOINT 保存点名称`设置了保存点（可设置多个），当某条语句出错后 **应用层**必须立即捕获并且在同一事务中执行`ROLLBACK TO 保存点名称`回滚到之前设置的保存点的状态，进行部分地可控的回滚，实现更精细的**原子性**和**一致性**控制（`ROLLBACK`仍然起效，回滚到最开始）。
+  - 一旦事务中某语句出错并进入了 **"failed transaction block"**状态，就无法再次使用保存点，只能进行全局`ROLLBACK`
 
 # 导出 Log 到外部文件
 ## `psql -U postgres -d myfastapi_db -c "\d *.*" > objects.txt`
