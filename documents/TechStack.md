@@ -1,3 +1,0 @@
-<!-- documents\TechStack.md -->
-
-

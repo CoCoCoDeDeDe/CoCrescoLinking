@@ -1,10 +1,10 @@
 
 # 启动
 ## 热重载
-`uvicorn main:app --reload`
+`uvicorn app.main:app --reload`
 - `main:app`表示从`main.py`文件中导入`app`对象
 - `--reload`会在代码变更时自动重启服务（only dev env）
-`uvicorn main:app --host 0.0.0.0 --port 8000`
+`uvicorn app.main:app --host 0.0.0.0 --port 8000`
 - `--host 0.0.0.0` 监听所有可用 IP 接口
 
 # `uvicorn`

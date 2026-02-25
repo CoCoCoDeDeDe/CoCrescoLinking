@@ -28,3 +28,10 @@ class Base(DeclarativeBase):
   # This is a private namespace, has its own MetaData object, to manage its tables
   # Declarativebase is public namespace for all tables
   pass
+
+async def get_db():
+  db = await AsyncSessionLocal()
+  try:
+    yield db
+  finally:
+    await db.close()
